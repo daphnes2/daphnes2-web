@@ -1,6 +1,6 @@
 ## Welcome to GitHub Pages
 
-<iframe src="https://geoglrb.github.io/geoglrb-web/test-sketch.html" height="300" width="500"></iframe>
+<iframe src="https://daphnes2.github.io/daphnes2-web/test-sketch.html" height="300" width="500"></iframe>
 
 You can use the [editor on GitHub](https://github.com/daphnes2/daphnes2-web/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
 
