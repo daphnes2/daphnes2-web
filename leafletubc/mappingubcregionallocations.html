@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Mapping UBC Locations</title>
+	<meta charset="utf-8" />
+
+	<!-- Leaflet styles and code. Place in the <head></head> element. -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" />
+	<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"></script>
+
+	<!-- jQuery is a library that simplifies many things in JavaScript.
+	     We'll use it to retrieve data from the web. -->
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+</head>
+
+
+</head>
+<body>
+
+	<div class="map-overlay">
+		<h1 style="font-family:Arial"><center>UBC Regional Locations</center></h1>
+		<h3 style="font-family:Arial"><center>Hover over symbols for location name.</center></h3>
+	</div>
+
+  <div id="mapid" style="width: 600px; height: 400px; position: absolute; top: 0px; left: 0px; right: 0px; bottom: 50px; margin: auto; border:2px solid black"></div>
+
+  <script>
+
+    // Creating a Leaflet map with L.map().
+    // Storing the map in the variable 'map'.
+    var map = L.map('mapid',
+                    {
+      								center: [54.92572, -96.60520],
+      								zoom: 2.6
+    								}
+              );
+
+		//Switching up the tiles used
+		var topoTiles = L.tileLayer(
+      								'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+                      {
+												maxZoom: 20,
+												attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+											}
+										).addTo(map);
+
+		//Creating a variable for the off Campus Options
+    var offCampusOptions = {
+    	radius: 4,
+			//Orange fill because complimentary color to primarily blue background - color picked from colorbrewer (more contrast)
+    	fillColor: "#e6550d",
+    	color: "#000",
+    	weight: 1,
+    	opacity: 0.7,
+    	fillOpacity: 0.2
+		};
+
+		//Move over Off Campus Options to display name of facility
+    function onoffCampus(feature, layer) {
+       // Displaying regional location name when mouse hovers over 
+       if (feature.properties && feature.properties.NAME) {
+          layer.bindTooltip(feature.properties.NAME);
+       }
+    }
+
+		//Loading Off Campus Options (regional locations) in data
+		$.getJSON("https://raw.githubusercontent.com/UBCGeodata/ubc-geospatial-opendata/master/off-campus/locations/geojson/ubc_regional_locations.geojson",
+              function(data){
+    						L.geoJSON(data, {
+   								  pointToLayer: function (feature, latlng) {
+        							               return L.circleMarker(
+                                       latlng,
+                                       offCampusOptions
+                                     );
+    							                },
+                    onEachFeature: onoffCampus
+                  }
+                ).addTo(map);});
+
+  </script>
+
+</body>
+</html>
