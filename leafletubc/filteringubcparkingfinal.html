@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Mapping UBC Parking Locations</title>
+	<meta charset="utf-8" />
+
+	<!-- Leaflet styles and code. Place in the <head></head> element. -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" />
+	<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"></script>
+
+	<!-- jQuery is a library that simplifies many things in JavaScript.
+	     We'll use it to retrieve data from the web. -->
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+</head>
+
+<style>
+.center {
+  margin: auto;
+  width: 40%;
+  padding: 20px;
+}
+</style>
+
+<body>
+
+	<div class="map-overlay">
+		<h1 style="font-family:Arial"><center>UBC Parking Lots</center></h1>
+		<h3 style="font-family:Arial"><center>Hover over symbols for parking lot name and rate.</center></h3>
+		<h3 style="font-family:Arial"><center>Parking Hours Options:</center></h3>
+		<h6 style="font-family:Arial"><center> 1) 12:00 AM - 11:59 PM 2) 6:00 AM - 6:00 PM 3) 7:00 AM - Midnight 4) 9:00 AM - 5:00 PM</center></h6>
+	</div>
+
+  <div id="mapid" style="width: 600px; height: 400px; position: 50, 100; top: 0px; left: 0px; right: 0px; bottom: 5px; margin: auto; border:2px solid black"></div>
+
+	<div id="controls" class="center">
+	      <button id="showAllParkingButton">Show All Parking</button>
+	      <span style="display:inline-block; width: 170px"></span>
+	      <input type="text" id="highlightParkingTextEntry" placeholder="parking hours" />
+	      <button id="highlightParkingButton">Filter Parking Hours</button>
+	    </div>
+  <script>
+
+    // Creating a Leaflet map with L.map().
+    // Storing the map in the variable 'map'.
+    var map = L.map('mapid',
+                    {
+      								center: [49.262132846809195, -123.23516879806614],
+      								zoom: 13
+    								}
+              );
+
+		//Switching up the tiles used
+		var topoTiles = L.tileLayer(
+      								'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+                      {
+												maxZoom: 20,
+												attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+											}
+										).addTo(map);
+
+		//Creating a variable for the off Campus Options
+    var parkingMarkerOptions = {
+    	radius: 4,
+			//Orange fill because complimentary color to primarily blue background - color picked from colorbrewer (more contrast)
+    	fillColor: "#e6550d",
+    	color: "#000",
+    	weight: 1,
+    	opacity: 0.9,
+    	fillOpacity: 0.9
+		};
+
+		var parkingMarkerHighlightedOptions = {
+        	radius: 6,
+        	fillColor: "#5B4099",  // Make highlighted trees orange.
+        	color: "#000",
+        	weight: 1,
+        	opacity: 0.9,
+        	fillOpacity: 0.9
+      };
+
+		//Move over Off Campus Options to display name of facility
+    function onEachParking(feature, layer) {
+       // Displaying regional location name when mouse hovers over
+       if (feature.properties && feature.properties.FAC_DESCRIPTION && feature.properties.FAC_RATE) {
+          layer.bindTooltip("<b>Lot Name: </b>" + feature.properties.FAC_DESCRIPTION +
+					"<br><b>Lot Rate: </b>" + feature.properties.FAC_RATE);
+			 }
+			 else if (feature.properties && feature.properties.FAC_DESCRIPTION) {
+				 layer.bindTooltip("<b>Lot Name: </b>" + feature.properties.FAC_DESCRIPTION);
+			 }
+    }
+
+		function parkingPointToLayer(feature, latlng) {
+
+				// the next conditional lets us differentiate between the
+				// styling we use when we are highlighting a particular taxa
+				// of trees versus when we are displaying all trees.
+
+				if (hoursToHighlight === "") {
+					parkingMarkerOptionsToUse = parkingMarkerOptions;
+				} else {
+					parkingMarkerOptionsToUse = parkingMarkerHighlightedOptions;
+				}
+
+				// for the current feature, make a circleMarker.
+				return L.circleMarker(
+					latlng,
+					parkingMarkerOptionsToUse
+				);
+			}
+
+		function parkingToFilter (feature, layer) {
+        if(hoursToHighlight === "") {
+          return true;
+          // In this case, we're not highlighting anything, so draw everything.
+        }
+          else if (feature.properties && feature.properties.FAC_HOURSDAY) {
+            // We just checked to make sure there are properties to avoid an error
+            //   by asking for the .TAXA when there are no properties.
+            // Now, we need to check to see if the .TAXA matches what we're
+            //   trying to highlight.
+          return feature.properties.FAC_HOURSDAY.toLowerCase().includes(hoursToHighlight.toLowerCase());
+      		// We ignore uppercase/lowercase differences.
+          }
+						else {
+
+					return false;
+            // This is for features that lack properties.
+            // Don't display them.
+          }
+        }
+
+		var lastLayerAdded = {};
+			// Keeping track of lastLayerAdded lets us reset the map layers
+			// being shown so we don’t keep on layering new data on old.
+
+		function addParking() {
+	        if(map.hasLayer(lastLayerAdded)){  // reset the map layers if relevant.
+	           map.removeLayer(lastLayerAdded);
+	       }
+	          lastLayerAdded = L.geoJSON(parkingGeoJSONdata, {
+	       												pointToLayer: parkingPointToLayer,
+	                     				  onEachFeature: onEachParking,
+	              								filter: parkingToFilter
+	            										// filter out trees we aren't looking for,
+	            										//   if any.
+	          									 }
+	                           );
+	          lastLayerAdded.addTo(map);
+	        };
+
+	 var hoursToHighlight = "";
+					        // This is set by someone pressing the highlight button.
+					        // If it's an empty string, then just draw everything.
+
+	 function highlightParking() {
+				 hoursToHighlight = document
+						 .getElementById("highlightParkingTextEntry")
+						 .value;  // get any text from the input box.
+							      addParking(); // add the trees.
+							      hoursToHighlight = "";  // reset so that "Show All Trees" works.
+						 }
+
+   var parkingGeoJSONdata; // Where we store tree GeoJSON data
+	 //Loading Off Campus Options (regional locations) in data
+
+	 $.getJSON("https://raw.githubusercontent.com/UBCGeodata/ubcv-parking/master/geojson/ubcv_parking_www.geojson",
+				function(data){
+						// Store data for later:
+       	     	parkingGeoJSONdata = data;
+           	// Create event listener for ShowAllTrees Button:
+       			  document
+                .getElementById("showAllParkingButton")
+                .addEventListener("click", addParking);
+           	// Create event listener for the highlightTrees Button:
+           		document
+                .getElementById("highlightParkingButton")
+                .addEventListener("click", highlightParking);
+
+         					}
+         );
+  </script>
+
+</body>
+</html>
