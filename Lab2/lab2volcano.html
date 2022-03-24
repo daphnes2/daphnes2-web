@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Interactive Eldfell Volcano</title>
+	<h1 style="font-family:verdana">Explosion of Icelandic Volcano Eldfell on Heimaey Island</h1>
+	<p style="font-family:verdana">Determine area covered in ash in 'Vestmannaeyjar'. Radius of Ash Cover has to be a minimum of 690m and a maximum of 2135m.</p>
+	<meta charset="utf-8" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" />
+	<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"></script>
+  <script src="https://npmcdn.com/@turf/turf/turf.min.js"></script>
+
+  <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+
+        html, body, #map {
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+
+	<!-- 'Radius of Ash Cover' input box -->
+	<div id="enter" class="center">
+				<label style="font-family:verdana" for="bufferChangeEntry">Radius of Ash Cover (m):</label>
+				<input type="number" id="bufferChangeEntry" min="690" max="2135"></p>
+	</div>
+
+ <!-- 'Clear Ash Cover' button-->
+	<div>
+			  <button id="clearLayerButton">Clear Ash Cover</button>
+	</div>
+
+  <div id="mapid" style="width: 1000px; height: 700px;"></div>
+
+  <script>
+
+		var map = L.map('mapid',
+				{
+					center: [63.426556255163504, -20.273144577394845],
+				  zoom: 12.5
+				}
+				);
+
+		//Switching up the tiles used
+		var topoTiles = L.tileLayer(
+					'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+				{
+				  maxZoom: 17,
+					attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+				}).addTo(map);
+
+		//creating style options for all map symbols
+		var intersectionOptions = {
+				fillColor: "#6618AA",
+				fillOpacity: 0.4,
+				color: "#6618AA",
+				weight: 3,
+				opacity: 0.9,
+		};
+
+		var bufferedOptions = {
+				fillColor: "#CF3029",
+				color: "#CF3029",
+				weight: 3,
+				opacity: 0.9,
+				fillOpacity: 0.4
+		};
+
+		//creating town symbol
+    var town = turf.polygon([[[
+              -20.282649993896484,
+              63.444331979810094
+            ],
+            [
+              -20.282564163208008,
+              63.443487781650695
+            ],
+            [
+              -20.281877517700195,
+              63.442413311636116
+            ],
+            [
+              -20.282306671142578,
+              63.44133880130772
+            ],
+            [
+              -20.281705856323242,
+              63.44099341442615
+            ],
+            [
+              -20.27913093566894,
+              63.440724777305284
+            ],
+            [
+              -20.27913093566894,
+              63.44030262816731
+            ],
+            [
+              -20.281705856323242,
+              63.44049451491047
+            ],
+            [
+              -20.282649993896484,
+              63.43995722878995
+            ],
+            [
+              -20.284194946289062,
+              63.4397269602243
+            ],
+            [
+              -20.284452438354492,
+              63.4384604500214
+            ],
+            [
+              -20.281963348388672,
+              63.43849882994125
+            ],
+            [
+              -20.28127670288086,
+              63.43707873865616
+            ],
+            [
+              -20.28247833251953,
+              63.43707873865616
+            ],
+            [
+              -20.28247833251953,
+              63.4365797709502
+            ],
+            [
+              -20.281448364257812,
+              63.43523635315695
+            ],
+            [
+              -20.285825729370117,
+              63.43193511612548
+            ],
+            [
+              -20.28325080871582,
+              63.43155122666632
+            ],
+            [
+              -20.28204917907715,
+              63.43228061224106
+            ],
+            [
+              -20.28050422668457,
+              63.43212705892625
+            ],
+            [
+              -20.28204917907715,
+              63.43097538283345
+            ],
+            [
+              -20.27904510498047,
+              63.43070665175089
+            ],
+            [
+              -20.277328491210934,
+              63.432472552727276
+            ],
+            [
+              -20.277671813964844,
+              63.43416157356089
+            ],
+            [
+              -20.27629852294922,
+              63.43427673044628
+            ],
+            [
+              -20.276899337768555,
+              63.435197968865694
+            ],
+            [
+              -20.275955200195312,
+              63.43542827384177
+            ],
+            [
+              -20.276470184326172,
+              63.436349475231424
+            ],
+            [
+              -20.274152755737305,
+              63.43669491811533
+            ],
+            [
+              -20.27449607849121,
+              63.43776960266995
+            ],
+            [
+              -20.272178649902344,
+              63.43788474505229
+            ],
+            [
+              -20.272178649902344,
+              63.43704035683353
+            ],
+            [
+              -20.270204544067383,
+              63.43707873865616
+            ],
+            [
+              -20.269517898559567,
+              63.4378079835155
+            ],
+            [
+              -20.265140533447266,
+              63.437654459824756
+            ],
+            [
+              -20.264110565185547,
+              63.43719388381558
+            ],
+            [
+              -20.26256561279297,
+              63.43719388381558
+            ],
+            [
+              -20.261878967285156,
+              63.4365797709502
+            ],
+            [
+              -20.259904861450195,
+              63.43627270958039
+            ],
+            [
+              -20.259819030761715,
+              63.43654138845899
+            ],
+            [
+              -20.259819030761715,
+              63.43730902851217
+            ],
+            [
+              -20.25904655456543,
+              63.43857558962671
+            ],
+            [
+              -20.259475708007812,
+              63.43892100566567
+            ],
+            [
+              -20.26050567626953,
+              63.439266417539166
+            ],
+            [
+              -20.261192321777344,
+              63.43980371661854
+            ],
+            [
+              -20.262393951416016,
+              63.44030262816731
+            ],
+            [
+              -20.263080596923828,
+              63.440724777305284
+            ],
+            [
+              -20.263938903808594,
+              63.44110854384949
+            ],
+            [
+              -20.26479721069336,
+              63.44126204902734
+            ],
+            [
+              -20.266599655151367,
+              63.44126204902734
+            ],
+            [
+              -20.267114639282227,
+              63.44195281214612
+            ],
+            [
+              -20.267114639282227,
+              63.44252843535165
+            ],
+            [
+              -20.26368141174316,
+              63.443718019980466
+            ],
+            [
+              -20.26368141174316,
+              63.4442936077064
+            ],
+            [
+              -20.26453971862793,
+              63.4442936077064
+            ],
+            [
+              -20.26531219482422,
+              63.44379476567901
+            ],
+            [
+              -20.265827178955078,
+              63.44410174641652
+            ],
+            [
+              -20.266599655151367,
+              63.44417849108673
+            ],
+            [
+              -20.26702880859375,
+              63.444370351862396
+            ],
+            [
+              -20.270719528198242,
+              63.4446005830964
+            ],
+            [
+              -20.270719528198242,
+              63.4442936077064
+            ],
+            [
+              -20.26780128479004,
+              63.44406337400431
+            ],
+            [
+              -20.266857147216797,
+              63.44387151117191
+            ],
+            [
+              -20.267543792724606,
+              63.443756392855434
+            ],
+            [
+              -20.267629623413082,
+              63.44341103512943
+            ],
+            [
+              -20.2683162689209,
+              63.442950551682564
+            ],
+            [
+              -20.26926040649414,
+              63.443142420685255
+            ],
+            [
+              -20.270376205444336,
+              63.44341103512943
+            ],
+            [
+              -20.271320343017575,
+              63.44352615483421
+            ],
+            [
+              -20.27140617370605,
+              63.44387151117191
+            ],
+            [
+              -20.272350311279297,
+              63.44387151117191
+            ],
+            [
+              -20.27226448059082,
+              63.4446005830964
+            ],
+            [
+              -20.272951126098633,
+              63.4446005830964
+            ],
+            [
+              -20.27346611022949,
+              63.44379476567901
+            ],
+            [
+              -20.274152755737305,
+              63.44379476567901
+            ],
+            [
+              -20.27475357055664,
+              63.44341103512943
+            ],
+            [
+              -20.275611877441406,
+              63.443180794331546
+            ],
+            [
+              -20.276470184326172,
+              63.44344940841579
+            ],
+            [
+              -20.277070999145508,
+              63.44390988384122
+            ],
+            [
+              -20.277843475341797,
+              63.444408723863276
+            ],
+            [
+              -20.27904510498047,
+              63.444408723863276
+            ],
+            [
+              -20.28076171875,
+              63.444370351862396
+            ],
+            [
+              -20.282649993896484,
+              63.444331979810094
+            ]]], { name: 'poly1'});
+    	L.geoJson(town).bindTooltip("Vestmannaeyjar in 1973")
+			.addTo(map);
+
+		//creating volcano symbol
+    var eldfell = turf.point([-20.249004520988013, 63.432547876356345]);
+    	L.geoJson(eldfell)
+			.bindTooltip("<b>Eldfell Volcano</b><br>Eldfell exploded in 1973 causing great destruction of Vestmannaeyjar.<br> Majority of the town was covered in ash.<br> Amongst the chaos the exact radius of ash cover was never determined.<br>Using the input box you can experiment the extent of area impacted by ash cover.")
+			.addTo(map);
+
+
+		//creating an event listener that automatically updates the bufferChange value
+		const input = document.querySelector('input');
+		const bufferChangeEntry = document.getElementById('bufferChangeEntry');
+
+		input.addEventListener('change', updateValue);
+
+    //Creating a function that updates the ash cover radius (buffer) according to value added to input box
+		function updateValue(e) {
+			console.log("updateValue() has been called!");
+			console.log("e.target.value is ",e.target.value);
+			console.log("e.target is ",e.target);
+			console.log("Do you see what e.target is?")
+		  bufferChangeEntry.textContent = e.target.value;
+			if (bufferChangeEntry < 690)e.target.value = 690;
+			if (bufferChangeEntry > 2135)e.target.value = 2135;
+
+			var buffered = turf.buffer(eldfell, bufferChangeEntry.valueAsNumber, {units: 'meters'});
+			L.geoJson(buffered, bufferedOptions).addTo(map);
+
+			//buffer intersection
+			var intersection = turf.intersect(town, buffered);
+			//calculating intersection area
+			var intersectionArea = turf.area(intersection);
+
+			var intersectionAreaKm = turf.convertArea(intersectionArea, 'meters', 'kilometers' )
+			//adding intersection buffer to map with hover tag displaying area (m and km) squared
+				L.geoJson(intersection, intersectionOptions).bindTooltip("<b>Area covered by ash (m squared): </b>" + intersectionArea + "<br><b>Area covered by ash (km squared): </b>" + intersectionAreaKm)
+				.addTo(map);
+
+		};
+
+		//Coding button that removes buffer and intersection layers once added to the map
+		var shapes = L.layerGroup([buffered, intersection]);
+
+		function clearLayer() {
+			if(map.hasLayer(shapes)){
+			map.removeLayer(shapes);
+			}
+	  };
+
+	 function clearLayerButton() {
+			document
+			.getElementById('clearLayerButton')
+			.addEventListener('click', clearLayer());
+		 };
+
+  </script>
+
+</body>
+</html>
